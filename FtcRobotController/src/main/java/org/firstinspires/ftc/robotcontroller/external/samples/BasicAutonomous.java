@@ -4,11 +4,15 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
+
 
 @Autonomous (name= "BasicAutonomous")
 public class BasicAutonomous extends LinearOpMode {
     DcMotor leftFront, rightFront;
     DcMotor leftRear, rightRear;
+    public ModernRoboticsI2cColorSensor frontColorSensor = null;
+
 
     Servo claw;
     @Override
@@ -22,16 +26,28 @@ public class BasicAutonomous extends LinearOpMode {
 
         claw = hardwareMap.get(Servo.class, "claw");
 
+        frontColorSensor = hardwareMap.get(ModernRoboticsI2cColorSensor.class, "sensor_color");
         waitForStart();
 
         //This will make it moveeee in a loop!!!
         while (opModeIsActive()){
-                if(//sesnor too close to wall) turn blah blah blah)
-            moveForward(1.0,30);
+        frontColorSensor.enableLed(true);
 
-            //stopMotor() after every move (?)
+        telemetry.addData("Color Number", frontColorSensor.readUnsignedByte(ModernRoboticsI2cColorSensor.Register.COLOR_NUMBER));
+            telemetry.update();
 
+            if(frontColorSensor.readUnsignedByte(ModernRoboticsI2cColorSensor.Register.COLOR_NUMBER) == 10){
+            turnRight(1.0, 1);
+        } else {
+           turnLeft(1.0, 1);
         }
+        moveForward(1.0,3);
+        stopMotor();
+
+
+
+    }
+
 
 
 }
@@ -65,6 +81,14 @@ public class BasicAutonomous extends LinearOpMode {
         rightRear.setPower(-power);
 
         sleep(time);
+
+    }
+
+    public void stopMotor() {
+        leftFront.setPower(0);
+        leftRear.setPower(0);
+        rightFront.setPower(0);
+        rightRear.setPower(0);
 
     }
 
